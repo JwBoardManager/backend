@@ -1,0 +1,34 @@
+version: "2"
+# servers:
+# - engine: postgresql
+#   uri: "postgres://locahost:5432/postgres?sslmode=disable"
+sql:
+  - engine: "postgresql"
+    schema: schema.sql
+    queries: queries
+    # database:
+    #   managed: true
+    gen:
+      go:
+        package: "board"
+        out: "out"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_interface: true
+        json_tags_case_style: "camel"
+
+overrides:
+  go:
+    overrides:
+      - db_type: "weekday_enum"
+        go_type: "string"
+      - db_type: "meeting_type_enum"
+        go_type: "string"
+      - db_type: "assignment_type_enum"
+        go_type: "string"
+      - db_type: "cleaning_type_enum"
+        go_type: "string"
+      - db_type: "visit_type_enum"
+        go_type: "string"
+      - db_type: "visit_category_enum"
+        go_type: "string"
