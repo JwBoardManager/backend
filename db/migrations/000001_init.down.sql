@@ -31,3 +31,4 @@ DROP TYPE IF EXISTS cleaning_type_enum;
 DROP TYPE IF EXISTS weekday_enum;
 DROP TYPE IF EXISTS assignment_type_enum;
 DROP TYPE IF EXISTS meeting_type_enum;
+DROP TYPE IF EXISTS user_role_enum;

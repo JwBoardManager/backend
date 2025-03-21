@@ -25,6 +25,8 @@ CREATE TYPE cleaning_type_enum AS ENUM ('Before Meeting', 'After Meeting');
 -- ENUM para tipos de visita
 CREATE TYPE visit_type_enum AS ENUM ('Nobody Home', 'Busy', 'Visited', 'Letter');
 
+CREATE TYPE user_role_enum AS ENUM ('Elder', 'Ministerial_Servant', 'auxiliar_pioneer', 'regular_pioneer', 'student', 'publisher');
+
 -- ENUM para categoria da visita
 CREATE TYPE visit_category_enum AS ENUM ('Campaign', 'Normal');
 
@@ -33,9 +35,8 @@ CREATE TABLE users (
     id BIGINT PRIMARY KEY, -- Snowflake ID
     name TEXT NOT NULL,
     email TEXT UNIQUE,
-    role TEXT NOT NULL CHECK (
-        role IN ('ELDER', 'MINISTERIAL_SERVANT', 'AUXILIAR_PIONEER', 'REGULAR_PIONEER', 'STUDENT', 'PUBLISHER')
-    )
+    password TEXT NOT NULL,
+    role user_role_enum NOT NULL DEFAULT 'student'
 );
 
 -- Tabela de Grupos
@@ -57,7 +58,7 @@ CREATE TABLE meetings (
     id BIGINT PRIMARY KEY, -- Snowflake ID
     meeting_type meeting_type_enum NOT NULL,
     meeting_date DATE NOT NULL
-) PARTITION BY RANGE (meeting_date);
+);
 
 -- Tabela de Salas para reuniões
 CREATE TABLE rooms (
