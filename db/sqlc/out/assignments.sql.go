@@ -51,6 +51,56 @@ func (q *Queries) DeleteAssignment(ctx context.Context, id int64) error {
 	return err
 }
 
+const getAssignmentByID = `-- name: GetAssignmentByID :one
+SELECT id, meeting_id, subsession_id, user_id, assignment_type FROM assignments WHERE id = $1
+`
+
+func (q *Queries) GetAssignmentByID(ctx context.Context, id int64) (Assignment, error) {
+	row := q.db.QueryRowContext(ctx, getAssignmentByID, id)
+	var i Assignment
+	err := row.Scan(
+		&i.ID,
+		&i.MeetingID,
+		&i.SubsessionID,
+		&i.UserID,
+		&i.AssignmentType,
+	)
+	return i, err
+}
+
+const getAssignmentByUserID = `-- name: GetAssignmentByUserID :many
+SELECT id, meeting_id, subsession_id, user_id, assignment_type FROM assignments WHERE user_id = $1
+`
+
+func (q *Queries) GetAssignmentByUserID(ctx context.Context, userID int64) ([]Assignment, error) {
+	rows, err := q.db.QueryContext(ctx, getAssignmentByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Assignment
+	for rows.Next() {
+		var i Assignment
+		if err := rows.Scan(
+			&i.ID,
+			&i.MeetingID,
+			&i.SubsessionID,
+			&i.UserID,
+			&i.AssignmentType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAssignmentsByMeeting = `-- name: GetAssignmentsByMeeting :many
 SELECT id, meeting_id, subsession_id, user_id, assignment_type FROM assignments WHERE meeting_id = $1
 `
@@ -155,6 +205,17 @@ func (q *Queries) GetAssignmentsPaginated(ctx context.Context, arg GetAssignment
 		return nil, err
 	}
 	return items, nil
+}
+
+const getAssignmentsPaginatedCount = `-- name: GetAssignmentsPaginatedCount :one
+SELECT COUNT(*) FROM assignments
+`
+
+func (q *Queries) GetAssignmentsPaginatedCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getAssignmentsPaginatedCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const updateAssignment = `-- name: UpdateAssignment :exec

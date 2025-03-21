@@ -8,6 +8,15 @@ SELECT * FROM assignments WHERE meeting_id = $1;
 -- name: GetAssignmentsBySubsession :many
 SELECT * FROM assignments WHERE subsession_id = $1;
 
+-- name: GetAssignmentByUserID :many
+SELECT * FROM assignments WHERE user_id = $1;
+
+-- name: GetAssignmentByID :one
+SELECT * FROM assignments WHERE id = $1;
+
+-- name: GetAssignmentsPaginatedCount :one
+SELECT COUNT(*) FROM assignments;
+
 -- name: GetAssignmentsPaginated :many
 SELECT * FROM assignments
 ORDER BY id DESC
