@@ -152,6 +152,52 @@ func (ns NullMeetingTypeEnum) Value() (driver.Value, error) {
 	return string(ns.MeetingTypeEnum), nil
 }
 
+type UserRoleEnum string
+
+const (
+	UserRoleEnumElder              UserRoleEnum = "Elder"
+	UserRoleEnumMinisterialServant UserRoleEnum = "Ministerial_Servant"
+	UserRoleEnumAuxiliarPioneer    UserRoleEnum = "auxiliar_pioneer"
+	UserRoleEnumRegularPioneer     UserRoleEnum = "regular_pioneer"
+	UserRoleEnumStudent            UserRoleEnum = "student"
+	UserRoleEnumPublisher          UserRoleEnum = "publisher"
+)
+
+func (e *UserRoleEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserRoleEnum(s)
+	case string:
+		*e = UserRoleEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserRoleEnum: %T", src)
+	}
+	return nil
+}
+
+type NullUserRoleEnum struct {
+	UserRoleEnum UserRoleEnum `json:"userRoleEnum"`
+	Valid        bool         `json:"valid"` // Valid is true if UserRoleEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserRoleEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserRoleEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserRoleEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserRoleEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserRoleEnum), nil
+}
+
 type VisitCategoryEnum string
 
 const (
@@ -380,10 +426,11 @@ type Territory struct {
 }
 
 type User struct {
-	ID    int64          `json:"id"`
-	Name  string         `json:"name"`
-	Email sql.NullString `json:"email"`
-	Role  string         `json:"role"`
+	ID       int64          `json:"id"`
+	Name     string         `json:"name"`
+	Email    sql.NullString `json:"email"`
+	Password string         `json:"password"`
+	Role     UserRoleEnum   `json:"role"`
 }
 
 type UserGroup struct {

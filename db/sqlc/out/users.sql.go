@@ -11,15 +11,16 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, name, email, role)
-VALUES ($1, $2, $3, $4) RETURNING id, name, email, role
+INSERT INTO users (id, name, email, password, role)
+VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, password, role
 `
 
 type CreateUserParams struct {
-	ID    int64          `json:"id"`
-	Name  string         `json:"name"`
-	Email sql.NullString `json:"email"`
-	Role  string         `json:"role"`
+	ID       int64          `json:"id"`
+	Name     string         `json:"name"`
+	Email    sql.NullString `json:"email"`
+	Password string         `json:"password"`
+	Role     UserRoleEnum   `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -27,6 +28,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.ID,
 		arg.Name,
 		arg.Email,
+		arg.Password,
 		arg.Role,
 	)
 	var i User
@@ -34,6 +36,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.ID,
 		&i.Name,
 		&i.Email,
+		&i.Password,
 		&i.Role,
 	)
 	return i, err
@@ -49,7 +52,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, name, email, role FROM users
+SELECT id, name, email, password, role FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
@@ -65,6 +68,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.ID,
 			&i.Name,
 			&i.Email,
+			&i.Password,
 			&i.Role,
 		); err != nil {
 			return nil, err
@@ -81,7 +85,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, email, role FROM users WHERE id = $1
+SELECT id, name, email, password, role FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
@@ -91,6 +95,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.ID,
 		&i.Name,
 		&i.Email,
+		&i.Password,
 		&i.Role,
 	)
 	return i, err
@@ -104,7 +109,7 @@ type UpdateUserParams struct {
 	ID    int64          `json:"id"`
 	Name  string         `json:"name"`
 	Email sql.NullString `json:"email"`
-	Role  string         `json:"role"`
+	Role  UserRoleEnum   `json:"role"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
